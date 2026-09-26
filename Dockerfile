@@ -15,6 +15,9 @@ RUN apt-get update && apt-get install -y \
     php-gd \
     php-intl \
     php-apcu \
+    php-bcmath \
+    php-ldap \
+    php-soap \
     git \
     unzip \
     curl \
