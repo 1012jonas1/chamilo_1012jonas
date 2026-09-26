@@ -25,17 +25,19 @@ RUN apt-get update && apt-get install -y \
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
 WORKDIR /var/www
 
-RUN git clone --depth 1 --branch v2.0.3 \
-    https://github.com/chamilo/chamilo-lms.git chamilo
+RUN git clone --depth 1 https://github.com/chamilo/chamilo-lms.git chamilo
 
 WORKDIR /var/www/chamilo
 
 RUN composer install \
     --no-interaction \
     --prefer-dist \
-    --optimize-autoloader
+    --optimize-autoloader \
+    --no-dev
 
 RUN a2enmod rewrite headers expires
 
