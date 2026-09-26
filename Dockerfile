@@ -122,6 +122,8 @@ COPY start.sh /start.sh
 
 RUN chmod +x /start.sh
 
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+
 
 # ============================================================
 # 9. Railway poort
