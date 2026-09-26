@@ -1,31 +1,25 @@
 FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV COMPOSER_ALLOW_SUPERUSER=1
 
 RUN apt-get update && apt-get install -y \
     apache2 \
-    php8.3 \
-    libapache2-mod-php8.3 \
-    php8.3-cli \
-    php8.3-curl \
-    php8.3-gd \
-    php8.3-intl \
-    php8.3-ldap \
-    php8.3-mbstring \
-    php8.3-mysql \
-    php8.3-soap \
-    php8.3-xml \
-    php8.3-zip \
-    php8.3-bcmath \
-    php8.3-apcu \
+    php \
+    php-cli \
+    php-mysql \
+    php-xml \
+    php-mbstring \
+    php-curl \
+    php-zip \
+    php-gd \
+    php-intl \
+    php-apcu \
+    git \
     unzip \
     curl \
-    git \
+    composer \
     && rm -rf /var/lib/apt/lists/*
-
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
-ENV COMPOSER_ALLOW_SUPERUSER=1
 
 WORKDIR /var/www
 
@@ -38,16 +32,12 @@ RUN composer install \
     --prefer-dist \
     --optimize-autoloader
 
-RUN a2enmod rewrite headers expires
+RUN a2enmod rewrite
 
-RUN rm -f /etc/apache2/sites-enabled/000-default.conf
+RUN rm -f /var/www/html/index.html
 
-COPY apache.conf /etc/apache2/sites-available/chamilo.conf
-
-RUN a2ensite chamilo.conf
-
-RUN chown -R www-data:www-data /var/www/chamilo
+RUN ln -s /var/www/chamilo/public /var/www/html/chamilo
 
 EXPOSE 80
 
-CMD ["apache2ctl", "-D", "FOREGROUND"]
+CMD ["apachectl", "-D", "FOREGROUND"]
