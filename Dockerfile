@@ -24,6 +24,10 @@ RUN apt-get update && apt-get install -y \
     composer \
     && rm -rf /var/lib/apt/lists/*
 
+RUN echo "display_errors=On" > /etc/php/8.3/apache2/conf.d/99-errors.ini \
+    && echo "display_startup_errors=On" >> /etc/php/8.3/apache2/conf.d/99-errors.ini \
+    && echo "error_reporting=E_ALL" >> /etc/php/8.3/apache2/conf.d/99-errors.ini
+
 WORKDIR /var/www
 
 RUN git clone --depth 1 https://github.com/chamilo/chamilo-lms.git chamilo
