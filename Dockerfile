@@ -36,8 +36,7 @@ WORKDIR /var/www/chamilo
 RUN composer install \
     --no-interaction \
     --prefer-dist \
-    --optimize-autoloader \
-    --no-dev
+    --optimize-autoloader
 
 RUN a2enmod rewrite headers expires
 
