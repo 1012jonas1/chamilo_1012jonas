@@ -27,7 +27,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-RUN git clone --branch 2.0.3 --depth 1 \
+RUN git clone --depth 1 --branch v2.0.3 \
     https://github.com/chamilo/chamilo-lms.git chamilo
 
 WORKDIR /var/www/chamilo
