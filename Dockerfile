@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
 # ============================================================
-# 1. Apache + PHP + benodigde PHP-extensies
+# PHP + Apache + dependencies
 # ============================================================
 
 RUN apt-get update && apt-get install -y \
@@ -31,7 +31,7 @@ RUN apt-get update && apt-get install -y \
 
 
 # ============================================================
-# 2. Chamilo downloaden
+# Chamilo downloaden
 # ============================================================
 
 WORKDIR /var/www
@@ -42,7 +42,7 @@ WORKDIR /var/www/chamilo
 
 
 # ============================================================
-# 3. Composer dependencies
+# Composer
 # ============================================================
 
 RUN composer install \
@@ -52,22 +52,19 @@ RUN composer install \
 
 
 # ============================================================
-# 4. Chamilo directories schrijfbaar maken
+# Chamilo configuratiebestanden
 # ============================================================
 
-RUN mkdir -p \
-    /var/www/chamilo/var \
-    /var/www/chamilo/config \
-    /var/www/chamilo/public \
-    && touch /var/www/chamilo/.env \
-    && chown -R www-data:www-data \
-        /var/www/chamilo/var \
-        /var/www/chamilo/config \
-        /var/www/chamilo/.env
+RUN touch .env
+
+RUN chown -R www-data:www-data \
+    .env \
+    config \
+    var
 
 
 # ============================================================
-# 5. Apache modules
+# Apache modules
 # ============================================================
 
 RUN a2enmod rewrite
@@ -76,64 +73,37 @@ RUN a2enmod expires
 
 
 # ============================================================
-# 6. Apache configureren voor Chamilo 2
+# Chamilo Apache configuratie gebruiken
 # ============================================================
 
-RUN sed -i \
-    's#DocumentRoot /var/www/html#DocumentRoot /var/www/chamilo/public#' \
-    /etc/apache2/sites-available/000-default.conf
+RUN cp public/main/install/apache.dist.conf \
+    /etc/apache2/sites-available/chamilo.conf
 
-RUN printf '%s\n' \
-    '<Directory /var/www/chamilo/public>' \
-    '    AllowOverride All' \
-    '    Require all granted' \
-    '</Directory>' \
-    '' \
-    '<Directory /var/www/chamilo>' \
-    '    Options FollowSymLinks' \
-    '    AllowOverride All' \
-    '    Require all granted' \
-    '</Directory>' \
-    >> /etc/apache2/sites-available/000-default.conf
+RUN a2dissite 000-default.conf
+
+RUN a2ensite chamilo.conf
 
 
 # ============================================================
-# 7. PHP configuratie
+# ServerName
 # ============================================================
 
-RUN PHP_VERSION=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;') && \
-    printf '%s\n' \
-    'display_errors=Off' \
-    'display_startup_errors=Off' \
-    'log_errors=On' \
-    'error_log=/proc/self/fd/2' \
-    'upload_max_filesize=256M' \
-    'post_max_size=256M' \
-    'memory_limit=512M' \
-    'max_execution_time=300' \
-    > /etc/php/${PHP_VERSION}/apache2/conf.d/99-chamilo.ini
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 
 # ============================================================
-# 8. Railway start script
+# Railway start script
 # ============================================================
 
 COPY start.sh /start.sh
 
 RUN chmod +x /start.sh
 
-RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
-
 
 # ============================================================
-# 9. Railway poort
+# Railway
 # ============================================================
 
 EXPOSE 80
-
-
-# ============================================================
-# 10. Apache starten
-# ============================================================
 
 CMD ["/start.sh"]
